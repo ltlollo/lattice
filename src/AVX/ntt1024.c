@@ -4,8 +4,6 @@
 #include <const.h>
 #include <ntt1024.h>
 
-#define OPT(i) i;
-
 typedef int i32;
 typedef __m128i i128;
 
@@ -57,8 +55,6 @@ bitrevinttdit32x1024muliphi(i32 *dst, const i32 *src) {
     nttditstagen(dst, iwvec128);
     mulvec(dst, dst, inphi);
 }
-
-// note add/mask1 if not gt0 => add q always
 
 static inline i128
 mulmod0x20008001u(i128 v, i128 mv) {
@@ -122,8 +118,8 @@ INTER void
 nttditstage0(i32 *dst, const i32 *src) {
     i32 i = 0;
     i128 i0, i1, i2, i3, o0, o1, mask1, q = _mm_set1_epi32(0x20008001);
-    OPT(i128 maxf = _mm_set1_epi32(0x20008000));
-    OPT(i128 mask0);
+    i128 maxf = _mm_set1_epi32(0x20008000);
+    i128 mask0;
     i128 minf = _mm_set1_epi32(0);
 
     bitrev32x1024(dst, src);
@@ -135,11 +131,11 @@ nttditstage0(i32 *dst, const i32 *src) {
     i3 = _mm_load_si128((i128 *)(dst + i + 12));
     o1 = _mm_hsub_epi32(i0, i1);
 
-    OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+    mask0 = _mm_cmpgt_epi32(o0, maxf);
     mask1 = _mm_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(o0 = _mm_sub_epi32(o0, mask0));
+    o0 = _mm_sub_epi32(o0, mask0);
     o1 = _mm_add_epi32(o1, mask1);
     i0 = _mm_unpacklo_epi32(o0, o1);
     i1 = _mm_unpackhi_epi32(o0, o1);
@@ -152,11 +148,11 @@ nttditstage0(i32 *dst, const i32 *src) {
         o1 = _mm_hsub_epi32(i2, i3);
         i1 = _mm_load_si128((i128 *)(dst + i + 16 + 4));
 
-        OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+        mask0 = _mm_cmpgt_epi32(o0, maxf);
         mask1 = _mm_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(o0 = _mm_sub_epi32(o0, mask0));
+        o0 = _mm_sub_epi32(o0, mask0);
         o1 = _mm_add_epi32(o1, mask1);
         i2 = _mm_unpacklo_epi32(o0, o1);
         i3 = _mm_unpackhi_epi32(o0, o1);
@@ -169,11 +165,11 @@ nttditstage0(i32 *dst, const i32 *src) {
         o1 = _mm_hsub_epi32(i0, i1);
         i3 = _mm_load_si128((i128 *)(dst + i + 16 + 12));
 
-        OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+        mask0 = _mm_cmpgt_epi32(o0, maxf);
         mask1 = _mm_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(o0 = _mm_sub_epi32(o0, mask0));
+        o0 = _mm_sub_epi32(o0, mask0);
         o1 = _mm_add_epi32(o1, mask1);
         i0 = _mm_unpacklo_epi32(o0, o1);
         i1 = _mm_unpackhi_epi32(o0, o1);
@@ -184,11 +180,11 @@ nttditstage0(i32 *dst, const i32 *src) {
     _mm_store_si128((i128 *)(dst + i + 4), i1);
     o1 = _mm_hsub_epi32(i2, i3);
 
-    OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+    mask0 = _mm_cmpgt_epi32(o0, maxf);
     mask1 = _mm_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(o0 = _mm_sub_epi32(o0, mask0));
+    o0 = _mm_sub_epi32(o0, mask0);
     o1 = _mm_add_epi32(o1, mask1);
     i2 = _mm_unpacklo_epi32(o0, o1);
     i3 = _mm_unpackhi_epi32(o0, o1);
@@ -209,8 +205,8 @@ nttditstage1(i32 *dst, i32 w256) {
     i128 i0, i1, i2, i3, o0, o1, mask1, m = _mm_set_epi32(w256, 1, w256, 1),
                                         // intel likes his args little fermat
             q = _mm_set1_epi32(0x20008001), minf = _mm_set1_epi32(0);
-    OPT(i128 maxf = _mm_set1_epi32(0x20008000));
-    OPT(i128 mask0);
+    i128 maxf = _mm_set1_epi32(0x20008000);
+    i128 mask0;
 
     i0 = _mm_load_si128((i128 *)(dst + i + 0));
     i1 = _mm_load_si128((i128 *)(dst + i + 4));
@@ -224,11 +220,11 @@ nttditstage1(i32 *dst, i32 w256) {
 
     i0 = _mm_add_epi32(o0, o1);
     i1 = _mm_sub_epi32(o0, o1);
-    OPT(mask0 = _mm_cmpgt_epi32(i0, maxf));
+    mask0 = _mm_cmpgt_epi32(i0, maxf);
     mask1 = _mm_cmpgt_epi32(minf, i1);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(i0 = _mm_sub_epi32(i0, mask0));
+    i0 = _mm_sub_epi32(i0, mask0);
     i1 = _mm_add_epi32(i1, mask1);
     o0 = _mm_unpacklo_epi64(i0, i1);
     o1 = _mm_unpackhi_epi64(i0, i1);
@@ -245,11 +241,11 @@ nttditstage1(i32 *dst, i32 w256) {
 
         i2 = _mm_add_epi32(o0, o1);
         i3 = _mm_sub_epi32(o0, o1);
-        OPT(mask0 = _mm_cmpgt_epi32(i2, maxf));
+        mask0 = _mm_cmpgt_epi32(i2, maxf);
         mask1 = _mm_cmpgt_epi32(minf, i3);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(i2 = _mm_sub_epi32(i2, mask0));
+        i2 = _mm_sub_epi32(i2, mask0);
         i3 = _mm_add_epi32(i3, mask1);
         o0 = _mm_unpacklo_epi64(i2, i3);
         o1 = _mm_unpackhi_epi64(i2, i3);
@@ -265,11 +261,11 @@ nttditstage1(i32 *dst, i32 w256) {
 
         i0 = _mm_add_epi32(o0, o1);
         i1 = _mm_sub_epi32(o0, o1);
-        OPT(mask0 = _mm_cmpgt_epi32(i0, maxf));
+        mask0 = _mm_cmpgt_epi32(i0, maxf);
         mask1 = _mm_cmpgt_epi32(minf, i1);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(i0 = _mm_sub_epi32(i0, mask0));
+        i0 = _mm_sub_epi32(i0, mask0);
         i1 = _mm_add_epi32(i1, mask1);
         o0 = _mm_unpacklo_epi64(i0, i1);
         o1 = _mm_unpackhi_epi64(i0, i1);
@@ -283,11 +279,11 @@ nttditstage1(i32 *dst, i32 w256) {
 
     i2 = _mm_add_epi32(o0, o1);
     i3 = _mm_sub_epi32(o0, o1);
-    OPT(mask0 = _mm_cmpgt_epi32(i2, maxf));
+    mask0 = _mm_cmpgt_epi32(i2, maxf);
     mask1 = _mm_cmpgt_epi32(minf, i3);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(i2 = _mm_sub_epi32(i2, mask0));
+    i2 = _mm_sub_epi32(i2, mask0);
     i3 = _mm_add_epi32(i3, mask1);
     o0 = _mm_unpacklo_epi64(i2, i3);
     o1 = _mm_unpackhi_epi64(i2, i3);
@@ -326,8 +322,8 @@ nttditstage(i32 *restrict dst, i32 const *restrict wvec, i32 im, i32 jm) {
     const i32 *vw = wvec;
     i128 m, i0, i1, o0, o1, mask1, q = _mm_set1_epi32(0x20008001),
                                    minf = _mm_set1_epi32(0);
-    OPT(i128 maxf = _mm_set1_epi32(0x20008000));
-    OPT(i128 mask0);
+    i128 maxf = _mm_set1_epi32(0x20008000);
+    i128 mask0;
 
     for (i = 0; i < im; ++i) {
         for (j = 0; j < jm; ++j) {
@@ -341,11 +337,11 @@ nttditstage(i32 *restrict dst, i32 const *restrict wvec, i32 im, i32 jm) {
             i0 = _mm_add_epi32(o0, o1);
             i1 = _mm_sub_epi32(o0, o1);
 
-            OPT(mask0 = _mm_cmpgt_epi32(i0, maxf));
+            mask0 = _mm_cmpgt_epi32(i0, maxf);
             mask1 = _mm_cmpgt_epi32(minf, i1);
-            OPT(mask0 = _mm_and_si128(mask0, q));
+            mask0 = _mm_and_si128(mask0, q);
             mask1 = _mm_and_si128(mask1, q);
-            OPT(i0 = _mm_sub_epi32(i0, mask0));
+            i0 = _mm_sub_epi32(i0, mask0);
             i1 = _mm_add_epi32(i1, mask1);
             _mm_store_si128((i128 *)(dst + f), i0);
             _mm_store_si128((i128 *)(dst + s), i1);
@@ -551,8 +547,8 @@ INTER void
 nttdifstage0(i32 *dst) {
     i32 i = 0;
     i128 i0, i1, i2, i3, o0, o1, mask1, q = _mm_set1_epi32(0x20008001);
-    OPT(i128 maxf = _mm_set1_epi32(0x20008000));
-    OPT(i128 mask0);
+    i128 maxf = _mm_set1_epi32(0x20008000);
+    i128 mask0;
     i128 minf = _mm_set1_epi32(0);
 
     i0 = _mm_load_si128((i128 *)(dst + i + 0));
@@ -562,11 +558,11 @@ nttdifstage0(i32 *dst) {
     i3 = _mm_load_si128((i128 *)(dst + i + 12));
     o1 = _mm_hsub_epi32(i0, i1);
 
-    OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+    mask0 = _mm_cmpgt_epi32(o0, maxf);
     mask1 = _mm_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(o0 = _mm_sub_epi32(o0, mask0));
+    o0 = _mm_sub_epi32(o0, mask0);
     o1 = _mm_add_epi32(o1, mask1);
     i0 = _mm_unpacklo_epi32(o0, o1);
     i1 = _mm_unpackhi_epi32(o0, o1);
@@ -579,11 +575,11 @@ nttdifstage0(i32 *dst) {
         o1 = _mm_hsub_epi32(i2, i3);
         i1 = _mm_load_si128((i128 *)(dst + i + 16 + 4));
 
-        OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+        mask0 = _mm_cmpgt_epi32(o0, maxf);
         mask1 = _mm_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(o0 = _mm_sub_epi32(o0, mask0));
+        o0 = _mm_sub_epi32(o0, mask0);
         o1 = _mm_add_epi32(o1, mask1);
         i2 = _mm_unpacklo_epi32(o0, o1);
         i3 = _mm_unpackhi_epi32(o0, o1);
@@ -596,11 +592,11 @@ nttdifstage0(i32 *dst) {
         o1 = _mm_hsub_epi32(i0, i1);
         i3 = _mm_load_si128((i128 *)(dst + i + 16 + 12));
 
-        OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+        mask0 = _mm_cmpgt_epi32(o0, maxf);
         mask1 = _mm_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(o0 = _mm_sub_epi32(o0, mask0));
+        o0 = _mm_sub_epi32(o0, mask0);
         o1 = _mm_add_epi32(o1, mask1);
         i0 = _mm_unpacklo_epi32(o0, o1);
         i1 = _mm_unpackhi_epi32(o0, o1);
@@ -611,11 +607,11 @@ nttdifstage0(i32 *dst) {
     _mm_store_si128((i128 *)(dst + i + 4), i1);
     o1 = _mm_hsub_epi32(i2, i3);
 
-    OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+    mask0 = _mm_cmpgt_epi32(o0, maxf);
     mask1 = _mm_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(o0 = _mm_sub_epi32(o0, mask0));
+    o0 = _mm_sub_epi32(o0, mask0);
     o1 = _mm_add_epi32(o1, mask1);
     i2 = _mm_unpacklo_epi32(o0, o1);
     i3 = _mm_unpackhi_epi32(o0, o1);
@@ -630,8 +626,8 @@ nttdifstage1(i32 *dst, i32 w256) {
     i128 i0, i1, i2, i3, o0, o1, mask1, m = _mm_set_epi32(w256, 1, w256, 1),
                                         // intel likes his args little fermat
             q = _mm_set1_epi32(0x20008001), minf = _mm_set1_epi32(0);
-    OPT(i128 maxf = _mm_set1_epi32(0x20008000));
-    OPT(i128 mask0);
+    i128 maxf = _mm_set1_epi32(0x20008000);
+    i128 mask0;
 
     i0 = _mm_load_si128((i128 *)(dst + i + 0));
     i1 = _mm_load_si128((i128 *)(dst + i + 4));
@@ -645,11 +641,11 @@ nttdifstage1(i32 *dst, i32 w256) {
     i0 = _mm_add_epi32(o0, o1);
     i1 = _mm_sub_epi32(o0, o1);
     mask1 = _mm_cmpgt_epi32(minf, i1);
-    OPT(mask0 = _mm_cmpgt_epi32(i0, maxf));
+    mask0 = _mm_cmpgt_epi32(i0, maxf);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     i1 = _mm_add_epi32(i1, mask1);
-    OPT(i0 = _mm_sub_epi32(i0, mask0));
+    i0 = _mm_sub_epi32(i0, mask0);
 
     i1 = mulmod0x20008001u(i1, m);
 
@@ -668,11 +664,11 @@ nttdifstage1(i32 *dst, i32 w256) {
         i2 = _mm_add_epi32(o0, o1);
         i3 = _mm_sub_epi32(o0, o1);
         mask1 = _mm_cmpgt_epi32(minf, i3);
-        OPT(mask0 = _mm_cmpgt_epi32(i2, maxf));
+        mask0 = _mm_cmpgt_epi32(i2, maxf);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         i3 = _mm_add_epi32(i3, mask1);
-        OPT(i2 = _mm_sub_epi32(i2, mask0));
+        i2 = _mm_sub_epi32(i2, mask0);
         i3 = mulmod0x20008001u(i3, m);
         o0 = _mm_unpacklo_epi64(i2, i3);
         o1 = _mm_unpackhi_epi64(i2, i3);
@@ -688,11 +684,11 @@ nttdifstage1(i32 *dst, i32 w256) {
         i0 = _mm_add_epi32(o0, o1);
         i1 = _mm_sub_epi32(o0, o1);
         mask1 = _mm_cmpgt_epi32(minf, i1);
-        OPT(mask0 = _mm_cmpgt_epi32(i0, maxf));
+        mask0 = _mm_cmpgt_epi32(i0, maxf);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         i1 = _mm_add_epi32(i1, mask1);
-        OPT(i0 = _mm_sub_epi32(i0, mask0));
+        i0 = _mm_sub_epi32(i0, mask0);
         i1 = mulmod0x20008001u(i1, m);
         o0 = _mm_unpacklo_epi64(i0, i1);
         o1 = _mm_unpackhi_epi64(i0, i1);
@@ -706,11 +702,11 @@ nttdifstage1(i32 *dst, i32 w256) {
     i2 = _mm_add_epi32(o0, o1);
     i3 = _mm_sub_epi32(o0, o1);
     mask1 = _mm_cmpgt_epi32(minf, i3);
-    OPT(mask0 = _mm_cmpgt_epi32(i2, maxf));
+    mask0 = _mm_cmpgt_epi32(i2, maxf);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     i3 = _mm_add_epi32(i3, mask1);
-    OPT(i2 = _mm_sub_epi32(i2, mask0));
+    i2 = _mm_sub_epi32(i2, mask0);
     i3 = mulmod0x20008001u(i3, m);
 
     o0 = _mm_unpacklo_epi64(i2, i3);
@@ -726,8 +722,8 @@ nttdifstage(i32 *restrict dst, i32 const *restrict wvec, i32 im, i32 jm) {
     const i32 *vw = wvec;
     i128 m, i0, i1, o0, o1, mask1, q = _mm_set1_epi32(0x20008001),
                                    minf = _mm_set1_epi32(0);
-    OPT(i128 maxf = _mm_set1_epi32(0x20008000));
-    OPT(i128 mask0);
+    i128 maxf = _mm_set1_epi32(0x20008000);
+    i128 mask0;
 
     for (i = 0; i < im; ++i) {
         for (j = 0; j < jm; ++j) {
@@ -741,11 +737,11 @@ nttdifstage(i32 *restrict dst, i32 const *restrict wvec, i32 im, i32 jm) {
             i1 = _mm_sub_epi32(o0, o1);
 
             mask1 = _mm_cmpgt_epi32(minf, i1);
-            OPT(mask0 = _mm_cmpgt_epi32(i0, maxf));
+            mask0 = _mm_cmpgt_epi32(i0, maxf);
             mask1 = _mm_and_si128(mask1, q);
-            OPT(mask0 = _mm_and_si128(mask0, q));
+            mask0 = _mm_and_si128(mask0, q);
             i1 = _mm_add_epi32(i1, mask1);
-            OPT(i0 = _mm_sub_epi32(i0, mask0));
+            i0 = _mm_sub_epi32(i0, mask0);
             i1 = mulmod0x20008001u(i1, m);
 
             _mm_store_si128((i128 *)(dst + f), i0);
@@ -758,8 +754,8 @@ INTER void
 bitrevnttditstage0(i32 *dst, const i32 *src) {
     i32 i = 0;
     i128 i0, i1, i2, i3, o0, o1, mask1, q = _mm_set1_epi32(0x20008001);
-    OPT(i128 maxf = _mm_set1_epi32(0x20008000));
-    OPT(i128 mask0);
+    i128 maxf = _mm_set1_epi32(0x20008000);
+    i128 mask0;
     i128 minf = _mm_set1_epi32(0);
 
     if (src != dst) {
@@ -773,11 +769,11 @@ bitrevnttditstage0(i32 *dst, const i32 *src) {
     i3 = _mm_load_si128((i128 *)(dst + i + 12));
     o1 = _mm_hsub_epi32(i0, i1);
 
-    OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+    mask0 = _mm_cmpgt_epi32(o0, maxf);
     mask1 = _mm_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(o0 = _mm_sub_epi32(o0, mask0));
+    o0 = _mm_sub_epi32(o0, mask0);
     o1 = _mm_add_epi32(o1, mask1);
     i0 = _mm_unpacklo_epi32(o0, o1);
     i1 = _mm_unpackhi_epi32(o0, o1);
@@ -790,11 +786,11 @@ bitrevnttditstage0(i32 *dst, const i32 *src) {
         o1 = _mm_hsub_epi32(i2, i3);
         i1 = _mm_load_si128((i128 *)(dst + i + 16 + 4));
 
-        OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+        mask0 = _mm_cmpgt_epi32(o0, maxf);
         mask1 = _mm_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(o0 = _mm_sub_epi32(o0, mask0));
+        o0 = _mm_sub_epi32(o0, mask0);
         o1 = _mm_add_epi32(o1, mask1);
         i2 = _mm_unpacklo_epi32(o0, o1);
         i3 = _mm_unpackhi_epi32(o0, o1);
@@ -807,11 +803,11 @@ bitrevnttditstage0(i32 *dst, const i32 *src) {
         o1 = _mm_hsub_epi32(i0, i1);
         i3 = _mm_load_si128((i128 *)(dst + i + 16 + 12));
 
-        OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+        mask0 = _mm_cmpgt_epi32(o0, maxf);
         mask1 = _mm_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm_and_si128(mask0, q));
+        mask0 = _mm_and_si128(mask0, q);
         mask1 = _mm_and_si128(mask1, q);
-        OPT(o0 = _mm_sub_epi32(o0, mask0));
+        o0 = _mm_sub_epi32(o0, mask0);
         o1 = _mm_add_epi32(o1, mask1);
         i0 = _mm_unpacklo_epi32(o0, o1);
         i1 = _mm_unpackhi_epi32(o0, o1);
@@ -822,11 +818,11 @@ bitrevnttditstage0(i32 *dst, const i32 *src) {
     _mm_store_si128((i128 *)(dst + i + 4), i1);
     o1 = _mm_hsub_epi32(i2, i3);
 
-    OPT(mask0 = _mm_cmpgt_epi32(o0, maxf));
+    mask0 = _mm_cmpgt_epi32(o0, maxf);
     mask1 = _mm_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm_and_si128(mask0, q));
+    mask0 = _mm_and_si128(mask0, q);
     mask1 = _mm_and_si128(mask1, q);
-    OPT(o0 = _mm_sub_epi32(o0, mask0));
+    o0 = _mm_sub_epi32(o0, mask0);
     o1 = _mm_add_epi32(o1, mask1);
     i2 = _mm_unpacklo_epi32(o0, o1);
     i3 = _mm_unpackhi_epi32(o0, o1);

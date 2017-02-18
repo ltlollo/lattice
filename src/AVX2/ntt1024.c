@@ -4,8 +4,6 @@
 #include <const.h>
 #include <ntt1024.h>
 
-#define OPT(i) i;
-
 typedef int i32;
 typedef __m256i i256;
 
@@ -62,8 +60,6 @@ bitrevinttdit32x1024muliphi(i32 * dst, const i32 * src) {
     nttditstagen(dst, iwvec256);
     mulvec(dst, dst, inphi);
 }
-
-// note add/mask1 if not gt0 => add q always
 
 static inline i256
 mulmod0x20008001u(i256 v, i256 mv) {
@@ -127,8 +123,8 @@ INTER void
 nttditstage0(i32 *restrict dst, const i32 *restrict src) {
     i32 i = 0;
     i256 i0, i1, i2, i3, o0, o1, mask1, q = _mm256_set1_epi32(0x20008001);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
     i256 minf = _mm256_set1_epi32(0);
 
     bitrev32x1024(dst, src);
@@ -140,11 +136,11 @@ nttditstage0(i32 *restrict dst, const i32 *restrict src) {
     i3 = _mm256_load_si256((i256 *)(dst + i + 24));
     o1 = _mm256_hsub_epi32(i0, i1);
 
-    OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+    mask0 = _mm256_cmpgt_epi32(o0, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(o0 = _mm256_sub_epi32(o0, mask0));
+    o0 = _mm256_sub_epi32(o0, mask0);
     o1 = _mm256_add_epi32(o1, mask1);
     i0 = _mm256_unpacklo_epi32(o0, o1);
     i1 = _mm256_unpackhi_epi32(o0, o1);
@@ -157,11 +153,11 @@ nttditstage0(i32 *restrict dst, const i32 *restrict src) {
         o1 = _mm256_hsub_epi32(i2, i3);
         i1 = _mm256_load_si256((i256 *)(dst + i + 32 + 8));
 
-        OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+        mask0 = _mm256_cmpgt_epi32(o0, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(o0 = _mm256_sub_epi32(o0, mask0));
+        o0 = _mm256_sub_epi32(o0, mask0);
         o1 = _mm256_add_epi32(o1, mask1);
         i2 = _mm256_unpacklo_epi32(o0, o1);
         i3 = _mm256_unpackhi_epi32(o0, o1);
@@ -174,11 +170,11 @@ nttditstage0(i32 *restrict dst, const i32 *restrict src) {
         o1 = _mm256_hsub_epi32(i0, i1);
         i3 = _mm256_load_si256((i256 *)(dst + i + 32 + 24));
 
-        OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+        mask0 = _mm256_cmpgt_epi32(o0, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(o0 = _mm256_sub_epi32(o0, mask0));
+        o0 = _mm256_sub_epi32(o0, mask0);
         o1 = _mm256_add_epi32(o1, mask1);
         i0 = _mm256_unpacklo_epi32(o0, o1);
         i1 = _mm256_unpackhi_epi32(o0, o1);
@@ -189,11 +185,11 @@ nttditstage0(i32 *restrict dst, const i32 *restrict src) {
     _mm256_store_si256((i256 *)(dst + i + 8), i1);
     o1 = _mm256_hsub_epi32(i2, i3);
 
-    OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+    mask0 = _mm256_cmpgt_epi32(o0, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(o0 = _mm256_sub_epi32(o0, mask0));
+    o0 = _mm256_sub_epi32(o0, mask0);
     o1 = _mm256_add_epi32(o1, mask1);
     i2 = _mm256_unpacklo_epi32(o0, o1);
     i3 = _mm256_unpackhi_epi32(o0, o1);
@@ -215,8 +211,8 @@ nttditstage1(i32 *dst, i32 w256) {
             m = _mm256_set_epi32(w256, 1, w256, 1, w256, 1, w256, 1),
             // intel likes his args little fermat
             q = _mm256_set1_epi32(0x20008001), minf = _mm256_set1_epi32(0);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
 
     i0 = _mm256_load_si256((i256 *)(dst + i + 0));
     i1 = _mm256_load_si256((i256 *)(dst + i + 8));
@@ -230,11 +226,11 @@ nttditstage1(i32 *dst, i32 w256) {
 
     i0 = _mm256_add_epi32(o0, o1);
     i1 = _mm256_sub_epi32(o0, o1);
-    OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+    mask0 = _mm256_cmpgt_epi32(i0, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, i1);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(i0 = _mm256_sub_epi32(i0, mask0));
+    i0 = _mm256_sub_epi32(i0, mask0);
     i1 = _mm256_add_epi32(i1, mask1);
     o0 = _mm256_unpacklo_epi64(i0, i1);
     o1 = _mm256_unpackhi_epi64(i0, i1);
@@ -251,11 +247,11 @@ nttditstage1(i32 *dst, i32 w256) {
 
         i2 = _mm256_add_epi32(o0, o1);
         i3 = _mm256_sub_epi32(o0, o1);
-        OPT(mask0 = _mm256_cmpgt_epi32(i2, maxf));
+        mask0 = _mm256_cmpgt_epi32(i2, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, i3);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(i2 = _mm256_sub_epi32(i2, mask0));
+        i2 = _mm256_sub_epi32(i2, mask0);
         i3 = _mm256_add_epi32(i3, mask1);
         o0 = _mm256_unpacklo_epi64(i2, i3);
         o1 = _mm256_unpackhi_epi64(i2, i3);
@@ -271,11 +267,11 @@ nttditstage1(i32 *dst, i32 w256) {
 
         i0 = _mm256_add_epi32(o0, o1);
         i1 = _mm256_sub_epi32(o0, o1);
-        OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+        mask0 = _mm256_cmpgt_epi32(i0, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, i1);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(i0 = _mm256_sub_epi32(i0, mask0));
+        i0 = _mm256_sub_epi32(i0, mask0);
         i1 = _mm256_add_epi32(i1, mask1);
         o0 = _mm256_unpacklo_epi64(i0, i1);
         o1 = _mm256_unpackhi_epi64(i0, i1);
@@ -289,11 +285,11 @@ nttditstage1(i32 *dst, i32 w256) {
 
     i2 = _mm256_add_epi32(o0, o1);
     i3 = _mm256_sub_epi32(o0, o1);
-    OPT(mask0 = _mm256_cmpgt_epi32(i2, maxf));
+    mask0 = _mm256_cmpgt_epi32(i2, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, i3);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(i2 = _mm256_sub_epi32(i2, mask0));
+    i2 = _mm256_sub_epi32(i2, mask0);
     i3 = _mm256_add_epi32(i3, mask1);
     o0 = _mm256_unpacklo_epi64(i2, i3);
     o1 = _mm256_unpackhi_epi64(i2, i3);
@@ -308,8 +304,8 @@ nttditstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
     i256 i0, i1, i2, i3, o0, o1, mask1,
             m = _mm256_set_epi32(w384, w256, w128, 1, w384, w256, w128, 1),
             q = _mm256_set1_epi32(0x20008001), minf = _mm256_set1_epi32(0);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
 
     i0 = _mm256_load_si256((i256 *)(dst + i + 0));
     i1 = _mm256_load_si256((i256 *)(dst + i + 8));
@@ -323,11 +319,11 @@ nttditstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
 
     i0 = _mm256_add_epi32(o0, o1);
     i1 = _mm256_sub_epi32(o0, o1);
-    OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+    mask0 = _mm256_cmpgt_epi32(i0, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, i1);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(i0 = _mm256_sub_epi32(i0, mask0));
+    i0 = _mm256_sub_epi32(i0, mask0);
     i1 = _mm256_add_epi32(i1, mask1);
     o0 = _mm256_permute2f128_si256(i0, i1, 32);
     o1 = _mm256_permute2f128_si256(i0, i1, 49);
@@ -345,11 +341,11 @@ nttditstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
 
         i2 = _mm256_add_epi32(o0, o1);
         i3 = _mm256_sub_epi32(o0, o1);
-        OPT(mask0 = _mm256_cmpgt_epi32(i2, maxf));
+        mask0 = _mm256_cmpgt_epi32(i2, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, i3);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(i2 = _mm256_sub_epi32(i2, mask0));
+        i2 = _mm256_sub_epi32(i2, mask0);
         i3 = _mm256_add_epi32(i3, mask1);
         o0 = _mm256_permute2f128_si256(i2, i3, 32);
         o1 = _mm256_permute2f128_si256(i2, i3, 49);
@@ -365,11 +361,11 @@ nttditstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
 
         i0 = _mm256_add_epi32(o0, o1);
         i1 = _mm256_sub_epi32(o0, o1);
-        OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+        mask0 = _mm256_cmpgt_epi32(i0, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, i1);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(i0 = _mm256_sub_epi32(i0, mask0));
+        i0 = _mm256_sub_epi32(i0, mask0);
         i1 = _mm256_add_epi32(i1, mask1);
         o0 = _mm256_permute2f128_si256(i0, i1, 32);
         o1 = _mm256_permute2f128_si256(i0, i1, 49);
@@ -383,11 +379,11 @@ nttditstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
 
     i2 = _mm256_add_epi32(o0, o1);
     i3 = _mm256_sub_epi32(o0, o1);
-    OPT(mask0 = _mm256_cmpgt_epi32(i2, maxf));
+    mask0 = _mm256_cmpgt_epi32(i2, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, i3);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(i2 = _mm256_sub_epi32(i2, mask0));
+    i2 = _mm256_sub_epi32(i2, mask0);
     i3 = _mm256_add_epi32(i3, mask1);
     o0 = _mm256_permute2f128_si256(i2, i3, 32);
     o1 = _mm256_permute2f128_si256(i2, i3, 49);
@@ -424,8 +420,8 @@ nttditstage(i32 *restrict dst, i32 const *restrict wvec, i32 im, i32 jm) {
     const i32 *vw = wvec;
     i256 m, i0, i1, o0, o1, mask1, q = _mm256_set1_epi32(0x20008001),
                                    minf = _mm256_set1_epi32(0);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
 
     for (i = 0; i < im; ++i) {
         for (j = 0; j < jm; ++j) {
@@ -439,11 +435,11 @@ nttditstage(i32 *restrict dst, i32 const *restrict wvec, i32 im, i32 jm) {
             i0 = _mm256_add_epi32(o0, o1);
             i1 = _mm256_sub_epi32(o0, o1);
 
-            OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+            mask0 = _mm256_cmpgt_epi32(i0, maxf);
             mask1 = _mm256_cmpgt_epi32(minf, i1);
-            OPT(mask0 = _mm256_and_si256(mask0, q));
+            mask0 = _mm256_and_si256(mask0, q);
             mask1 = _mm256_and_si256(mask1, q);
-            OPT(i0 = _mm256_sub_epi32(i0, mask0));
+            i0 = _mm256_sub_epi32(i0, mask0);
             i1 = _mm256_add_epi32(i1, mask1);
             _mm256_store_si256((i256 *)(dst + f), i0);
             _mm256_store_si256((i256 *)(dst + s), i1);
@@ -668,8 +664,8 @@ INTER void
 nttdifstage0(i32 *restrict dst) {
     i32 i = 0;
     i256 i0, i1, i2, i3, o0, o1, mask1, q = _mm256_set1_epi32(0x20008001);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
     i256 minf = _mm256_set1_epi32(0);
 
     i0 = _mm256_load_si256((i256 *)(dst + i + 0));
@@ -679,11 +675,11 @@ nttdifstage0(i32 *restrict dst) {
     i3 = _mm256_load_si256((i256 *)(dst + i + 24));
     o1 = _mm256_hsub_epi32(i0, i1);
 
-    OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+    mask0 = _mm256_cmpgt_epi32(o0, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(o0 = _mm256_sub_epi32(o0, mask0));
+    o0 = _mm256_sub_epi32(o0, mask0);
     o1 = _mm256_add_epi32(o1, mask1);
     i0 = _mm256_unpacklo_epi32(o0, o1);
     i1 = _mm256_unpackhi_epi32(o0, o1);
@@ -696,11 +692,11 @@ nttdifstage0(i32 *restrict dst) {
         o1 = _mm256_hsub_epi32(i2, i3);
         i1 = _mm256_load_si256((i256 *)(dst + i + 32 + 8));
 
-        OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+        mask0 = _mm256_cmpgt_epi32(o0, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(o0 = _mm256_sub_epi32(o0, mask0));
+        o0 = _mm256_sub_epi32(o0, mask0);
         o1 = _mm256_add_epi32(o1, mask1);
         i2 = _mm256_unpacklo_epi32(o0, o1);
         i3 = _mm256_unpackhi_epi32(o0, o1);
@@ -713,11 +709,11 @@ nttdifstage0(i32 *restrict dst) {
         o1 = _mm256_hsub_epi32(i0, i1);
         i3 = _mm256_load_si256((i256 *)(dst + i + 32 + 24));
 
-        OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+        mask0 = _mm256_cmpgt_epi32(o0, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(o0 = _mm256_sub_epi32(o0, mask0));
+        o0 = _mm256_sub_epi32(o0, mask0);
         o1 = _mm256_add_epi32(o1, mask1);
         i0 = _mm256_unpacklo_epi32(o0, o1);
         i1 = _mm256_unpackhi_epi32(o0, o1);
@@ -728,11 +724,11 @@ nttdifstage0(i32 *restrict dst) {
     _mm256_store_si256((i256 *)(dst + i + 8), i1);
     o1 = _mm256_hsub_epi32(i2, i3);
 
-    OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+    mask0 = _mm256_cmpgt_epi32(o0, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(o0 = _mm256_sub_epi32(o0, mask0));
+    o0 = _mm256_sub_epi32(o0, mask0);
     o1 = _mm256_add_epi32(o1, mask1);
     i2 = _mm256_unpacklo_epi32(o0, o1);
     i3 = _mm256_unpackhi_epi32(o0, o1);
@@ -748,8 +744,8 @@ nttdifstage1(i32 *dst, i32 w256) {
             m = _mm256_set_epi32(w256, 1, w256, 1, w256, 1, w256, 1),
             // intel likes his args little fermat
             q = _mm256_set1_epi32(0x20008001), minf = _mm256_set1_epi32(0);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
 
     i0 = _mm256_load_si256((i256 *)(dst + i + 0));
     i1 = _mm256_load_si256((i256 *)(dst + i + 8));
@@ -763,11 +759,11 @@ nttdifstage1(i32 *dst, i32 w256) {
     i0 = _mm256_add_epi32(o0, o1);
     i1 = _mm256_sub_epi32(o0, o1);
     mask1 = _mm256_cmpgt_epi32(minf, i1);
-    OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+    mask0 = _mm256_cmpgt_epi32(i0, maxf);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     i1 = _mm256_add_epi32(i1, mask1);
-    OPT(i0 = _mm256_sub_epi32(i0, mask0));
+    i0 = _mm256_sub_epi32(i0, mask0);
 
     i1 = mulmod0x20008001u(i1, m);
 
@@ -786,11 +782,11 @@ nttdifstage1(i32 *dst, i32 w256) {
         i2 = _mm256_add_epi32(o0, o1);
         i3 = _mm256_sub_epi32(o0, o1);
         mask1 = _mm256_cmpgt_epi32(minf, i3);
-        OPT(mask0 = _mm256_cmpgt_epi32(i2, maxf));
+        mask0 = _mm256_cmpgt_epi32(i2, maxf);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         i3 = _mm256_add_epi32(i3, mask1);
-        OPT(i2 = _mm256_sub_epi32(i2, mask0));
+        i2 = _mm256_sub_epi32(i2, mask0);
         i3 = mulmod0x20008001u(i3, m);
         o0 = _mm256_unpacklo_epi64(i2, i3);
         o1 = _mm256_unpackhi_epi64(i2, i3);
@@ -806,11 +802,11 @@ nttdifstage1(i32 *dst, i32 w256) {
         i0 = _mm256_add_epi32(o0, o1);
         i1 = _mm256_sub_epi32(o0, o1);
         mask1 = _mm256_cmpgt_epi32(minf, i1);
-        OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+        mask0 = _mm256_cmpgt_epi32(i0, maxf);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         i1 = _mm256_add_epi32(i1, mask1);
-        OPT(i0 = _mm256_sub_epi32(i0, mask0));
+        i0 = _mm256_sub_epi32(i0, mask0);
         i1 = mulmod0x20008001u(i1, m);
         o0 = _mm256_unpacklo_epi64(i0, i1);
         o1 = _mm256_unpackhi_epi64(i0, i1);
@@ -824,11 +820,11 @@ nttdifstage1(i32 *dst, i32 w256) {
     i2 = _mm256_add_epi32(o0, o1);
     i3 = _mm256_sub_epi32(o0, o1);
     mask1 = _mm256_cmpgt_epi32(minf, i3);
-    OPT(mask0 = _mm256_cmpgt_epi32(i2, maxf));
+    mask0 = _mm256_cmpgt_epi32(i2, maxf);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     i3 = _mm256_add_epi32(i3, mask1);
-    OPT(i2 = _mm256_sub_epi32(i2, mask0));
+    i2 = _mm256_sub_epi32(i2, mask0);
     i3 = mulmod0x20008001u(i3, m);
 
     o0 = _mm256_unpacklo_epi64(i2, i3);
@@ -844,8 +840,8 @@ nttdifstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
     i256 i0, i1, i2, i3, o0, o1, mask1,
             m = _mm256_set_epi32(w384, w256, w128, 1, w384, w256, w128, 1),
             q = _mm256_set1_epi32(0x20008001), minf = _mm256_set1_epi32(0);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
 
     i0 = _mm256_load_si256((i256 *)(dst + i + 0));
     i1 = _mm256_load_si256((i256 *)(dst + i + 8));
@@ -859,11 +855,11 @@ nttdifstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
     i0 = _mm256_add_epi32(o0, o1);
     i1 = _mm256_sub_epi32(o0, o1);
     mask1 = _mm256_cmpgt_epi32(minf, i1);
-    OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+    mask0 = _mm256_cmpgt_epi32(i0, maxf);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     i1 = _mm256_add_epi32(i1, mask1);
-    OPT(i0 = _mm256_sub_epi32(i0, mask0));
+    i0 = _mm256_sub_epi32(i0, mask0);
     i1 = mulmod0x20008001u(i1, m);
     o0 = _mm256_permute2f128_si256(i0, i1, 32);
     o1 = _mm256_permute2f128_si256(i0, i1, 49);
@@ -881,11 +877,11 @@ nttdifstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
         i2 = _mm256_add_epi32(o0, o1);
         i3 = _mm256_sub_epi32(o0, o1);
         mask1 = _mm256_cmpgt_epi32(minf, i3);
-        OPT(mask0 = _mm256_cmpgt_epi32(i2, maxf));
+        mask0 = _mm256_cmpgt_epi32(i2, maxf);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         i3 = _mm256_add_epi32(i3, mask1);
-        OPT(i2 = _mm256_sub_epi32(i2, mask0));
+        i2 = _mm256_sub_epi32(i2, mask0);
         i3 = mulmod0x20008001u(i3, m);
 
         o0 = _mm256_permute2f128_si256(i2, i3, 32);
@@ -902,11 +898,11 @@ nttdifstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
         i0 = _mm256_add_epi32(o0, o1);
         i1 = _mm256_sub_epi32(o0, o1);
         mask1 = _mm256_cmpgt_epi32(minf, i1);
-        OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+        mask0 = _mm256_cmpgt_epi32(i0, maxf);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         i1 = _mm256_add_epi32(i1, mask1);
-        OPT(i0 = _mm256_sub_epi32(i0, mask0));
+        i0 = _mm256_sub_epi32(i0, mask0);
         i1 = mulmod0x20008001u(i1, m);
 
         o0 = _mm256_permute2f128_si256(i0, i1, 32);
@@ -921,11 +917,11 @@ nttdifstage2(i32 *dst, i32 w128, i32 w256, i32 w384) {
     i2 = _mm256_add_epi32(o0, o1);
     i3 = _mm256_sub_epi32(o0, o1);
     mask1 = _mm256_cmpgt_epi32(minf, i3);
-    OPT(mask0 = _mm256_cmpgt_epi32(i2, maxf));
+    mask0 = _mm256_cmpgt_epi32(i2, maxf);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     i3 = _mm256_add_epi32(i3, mask1);
-    OPT(i2 = _mm256_sub_epi32(i2, mask0));
+    i2 = _mm256_sub_epi32(i2, mask0);
     i3 = mulmod0x20008001u(i3, m);
 
     o0 = _mm256_permute2f128_si256(i2, i3, 32);
@@ -941,8 +937,8 @@ nttdifstage(i32 *restrict dst, i32 const *restrict wvec, i32 im, i32 jm) {
     const i32 *vw = wvec;
     i256 m, i0, i1, o0, o1, mask1, q = _mm256_set1_epi32(0x20008001),
                                    minf = _mm256_set1_epi32(0);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
 
     for (i = 0; i < im; ++i) {
         for (j = 0; j < jm; ++j) {
@@ -956,11 +952,11 @@ nttdifstage(i32 *restrict dst, i32 const *restrict wvec, i32 im, i32 jm) {
             i1 = _mm256_sub_epi32(o0, o1);
 
             mask1 = _mm256_cmpgt_epi32(minf, i1);
-            OPT(mask0 = _mm256_cmpgt_epi32(i0, maxf));
+            mask0 = _mm256_cmpgt_epi32(i0, maxf);
             mask1 = _mm256_and_si256(mask1, q);
-            OPT(mask0 = _mm256_and_si256(mask0, q));
+            mask0 = _mm256_and_si256(mask0, q);
             i1 = _mm256_add_epi32(i1, mask1);
-            OPT(i0 = _mm256_sub_epi32(i0, mask0));
+            i0 = _mm256_sub_epi32(i0, mask0);
             i1 = mulmod0x20008001u(i1, m);
 
             _mm256_store_si256((i256 *)(dst + f), i0);
@@ -973,8 +969,8 @@ INTER void
 bitrevnttditstage0(i32 *restrict dst, const i32 *restrict src) {
     i32 i = 0;
     i256 i0, i1, i2, i3, o0, o1, mask1, q = _mm256_set1_epi32(0x20008001);
-    OPT(i256 maxf = _mm256_set1_epi32(0x20008000));
-    OPT(i256 mask0);
+    i256 maxf = _mm256_set1_epi32(0x20008000);
+    i256 mask0;
     i256 minf = _mm256_set1_epi32(0);
 
     if (src != dst) {
@@ -988,11 +984,11 @@ bitrevnttditstage0(i32 *restrict dst, const i32 *restrict src) {
     i3 = _mm256_load_si256((i256 *)(dst + i + 24));
     o1 = _mm256_hsub_epi32(i0, i1);
 
-    OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+    mask0 = _mm256_cmpgt_epi32(o0, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(o0 = _mm256_sub_epi32(o0, mask0));
+    o0 = _mm256_sub_epi32(o0, mask0);
     o1 = _mm256_add_epi32(o1, mask1);
     i0 = _mm256_unpacklo_epi32(o0, o1);
     i1 = _mm256_unpackhi_epi32(o0, o1);
@@ -1005,11 +1001,11 @@ bitrevnttditstage0(i32 *restrict dst, const i32 *restrict src) {
         o1 = _mm256_hsub_epi32(i2, i3);
         i1 = _mm256_load_si256((i256 *)(dst + i + 32 + 8));
 
-        OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+        mask0 = _mm256_cmpgt_epi32(o0, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(o0 = _mm256_sub_epi32(o0, mask0));
+        o0 = _mm256_sub_epi32(o0, mask0);
         o1 = _mm256_add_epi32(o1, mask1);
         i2 = _mm256_unpacklo_epi32(o0, o1);
         i3 = _mm256_unpackhi_epi32(o0, o1);
@@ -1022,11 +1018,11 @@ bitrevnttditstage0(i32 *restrict dst, const i32 *restrict src) {
         o1 = _mm256_hsub_epi32(i0, i1);
         i3 = _mm256_load_si256((i256 *)(dst + i + 32 + 24));
 
-        OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+        mask0 = _mm256_cmpgt_epi32(o0, maxf);
         mask1 = _mm256_cmpgt_epi32(minf, o1);
-        OPT(mask0 = _mm256_and_si256(mask0, q));
+        mask0 = _mm256_and_si256(mask0, q);
         mask1 = _mm256_and_si256(mask1, q);
-        OPT(o0 = _mm256_sub_epi32(o0, mask0));
+        o0 = _mm256_sub_epi32(o0, mask0);
         o1 = _mm256_add_epi32(o1, mask1);
         i0 = _mm256_unpacklo_epi32(o0, o1);
         i1 = _mm256_unpackhi_epi32(o0, o1);
@@ -1037,11 +1033,11 @@ bitrevnttditstage0(i32 *restrict dst, const i32 *restrict src) {
     _mm256_store_si256((i256 *)(dst + i + 8), i1);
     o1 = _mm256_hsub_epi32(i2, i3);
 
-    OPT(mask0 = _mm256_cmpgt_epi32(o0, maxf));
+    mask0 = _mm256_cmpgt_epi32(o0, maxf);
     mask1 = _mm256_cmpgt_epi32(minf, o1);
-    OPT(mask0 = _mm256_and_si256(mask0, q));
+    mask0 = _mm256_and_si256(mask0, q);
     mask1 = _mm256_and_si256(mask1, q);
-    OPT(o0 = _mm256_sub_epi32(o0, mask0));
+    o0 = _mm256_sub_epi32(o0, mask0);
     o1 = _mm256_add_epi32(o1, mask1);
     i2 = _mm256_unpacklo_epi32(o0, o1);
     i3 = _mm256_unpackhi_epi32(o0, o1);
